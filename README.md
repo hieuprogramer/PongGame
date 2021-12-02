@@ -38,7 +38,7 @@ Pong game (hay còn gọi là game bóng bàn) là ứng dụng chơi game đư�
 
 ## 3. Cách cài đặt:
 
-Người chơi có thể truy cập [đường link](https://github.com/hieuprogramer/PongGame?fbclid=IwAR0MzSGk4KnLwcaQhgRv0mE6k769Yu2RqGfj0syQ0aepX3qNjVW5d4gzYpY) này để download source code. 
+Người dùng netbean chỉ cần clone về và chạy. Game được code trên netbean 8.2.
 
 ## 4. Cách sử dụng:
 
