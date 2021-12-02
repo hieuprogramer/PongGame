@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package Pong3;
+package ponggame;
 import java.awt.*;
 import java.awt.event.*;
 import java.util.*;

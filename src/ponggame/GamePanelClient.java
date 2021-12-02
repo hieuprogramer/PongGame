@@ -3,16 +3,26 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package Pong3;
+package ponggame;
+
+/**
+ *
+ * @author daoxuanhieu
+ */
+/*
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
+ */
+import static ponggame.GamePanelServer.MAX_SCORE;
 import java.awt.*;
 import java.awt.event.*;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
-import java.io.ObjectOutputStream;
+import java.io.ObjectInputStream;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
@@ -23,11 +33,12 @@ import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.*;
+import javax.swing.table.DefaultTableModel;
 /**
  *
  * @author daoxuanhieu
  */
-public class GamePanelServer extends JPanel implements Runnable {
+public class GamePanelClient extends JPanel implements Runnable {
     static final int GAME_WIDTH = 1000;
     static final int GAME_HEIGHT = (int)(GAME_WIDTH*(0.5555));
     static final Dimension SCREEN_SIZE = new Dimension(GAME_WIDTH, GAME_HEIGHT);
@@ -44,19 +55,20 @@ public class GamePanelServer extends JPanel implements Runnable {
     Ball[] balls;
     int ballNum;
     Score score;
-    long lastTime;
-    //DatagramSocket server;
-    ServerSocket server;
-    GamePanelServer(int ballNum) {
+    String ipserver;
+    //DatagramSocket client;
+    Socket client;
+    
+    GamePanelClient(String ipserver, int ballNum) {
         this.ballNum = ballNum;
         balls = new Ball[ballNum];
         newPaddles();
         newBall();
+        this.ipserver = ipserver; 
         score = new Score(GAME_WIDTH, GAME_HEIGHT);
         this.setFocusable(true);
         this.addKeyListener(new AL());
         this.setPreferredSize(SCREEN_SIZE);
-                
         gameThread = new Thread(this);
         gameThread.start();
     }
@@ -85,52 +97,14 @@ public class GamePanelServer extends JPanel implements Runnable {
         score.draw(g);
     }
     public void move() {
-        paddle1.move();
-        //paddle2.move();
-        for(int i=0; i<ballNum; i++) {
-            balls[i].move();
-        }
+        paddle2.move();
     }
     public void checkCollision() {
-        for(int i=0; i<ballNum; i++) {
-            if(balls[i].y <= 0) {
-                balls[i].setYDirection(-balls[i].yVelocity);
-            }
-            if(balls[i].y >= GAME_HEIGHT-BALL_DIAMETER) {
-                balls[i].setYDirection(-balls[i].yVelocity);
-            }
-
-            if(balls[i].intersects(paddle1)) {
-                balls[i].xVelocity = Math.abs(balls[i].xVelocity);
-                balls[i].setXDirection(balls[i].xVelocity);
-                balls[i].setYDirection(balls[i].yVelocity);
-            }
-            if(balls[i].intersects(paddle2)) {
-                balls[i].xVelocity = Math.abs(balls[i].xVelocity);
-                balls[i].setXDirection(-balls[i].xVelocity);
-                balls[i].setYDirection(balls[i].yVelocity);
-            }
-
-            if(balls[i].x <= 0) {
-                if(score.player2<MAX_SCORE) score.player2++;
-                //newPaddles();
-                random = new Random();
-                balls[i] = new Ball((GAME_WIDTH/2)-(BALL_DIAMETER/2), random.nextInt(GAME_HEIGHT-BALL_DIAMETER), BALL_DIAMETER, BALL_DIAMETER);
-                System.out.println("Player 2: "+score.player2);
-            }
-            if(balls[i].x >= GAME_WIDTH - BALL_DIAMETER) {
-                if(score.player1<MAX_SCORE) score.player1++;
-                random = new Random();
-                balls[i] = new Ball((GAME_WIDTH/2)-(BALL_DIAMETER/2), random.nextInt(GAME_HEIGHT-BALL_DIAMETER), BALL_DIAMETER, BALL_DIAMETER);
-                System.out.println("Player 1: "+score.player1);
-            }
+        if(paddle2.y <= 0) {
+            paddle2.y = 0;
         }
-        
-        if(paddle1.y <= 0) {
-            paddle1.y = 0;
-        }
-        if(paddle1.y >= (GAME_HEIGHT - PADDLE_HEIGHT)) {
-            paddle1.y = GAME_HEIGHT - PADDLE_HEIGHT;
+        if(paddle2.y >= (GAME_HEIGHT - PADDLE_HEIGHT)) {
+            paddle2.y = GAME_HEIGHT - PADDLE_HEIGHT;
         }
         
     }
@@ -149,40 +123,35 @@ public class GamePanelServer extends JPanel implements Runnable {
     }
     public void run() {
         try {
-            lastTime = System.nanoTime();
+            long lastTime = System.nanoTime();
             double amountOfTicks = 60.0;
             double ns = 1000000000/amountOfTicks;
             double delta = 0;
             
-            server = new ServerSocket(1776);
-            System.out.println("Game dang chay tren port 1776");
-            Socket sc = server.accept();
-            System.out.println("Thanh cong");
-                        
+            client = new Socket(ipserver, 1776);
+            System.out.println("Da vao game");
+            
             while(true) {
                 long now = System.nanoTime();
                 delta += (now-lastTime)/ns;
                 lastTime = now;
-                if(delta >= 1) {
-                    //System.out.println(delta +" "+lastTime+" "+now);
-                    move();                    
+                if(delta >= 1) { 
+                    move();
                     checkCollision();
-                    BufferedOutputStream bos = new BufferedOutputStream(sc.getOutputStream());
-                    DataOutputStream dos = new DataOutputStream(bos);
-                    for(int i=0; i<ballNum; i++) {
-                        dos.writeInt((int)balls[i].getX());
-                        dos.writeInt((int)balls[i].getY());
-                    }
-                    dos.writeInt((int)paddle1.getX());
-                    dos.writeInt((int)paddle1.getY());
-                    dos.writeInt(score.player1);
-                    dos.writeInt(score.player2);
-                    bos.flush();
-                    
-                    BufferedInputStream bis = new BufferedInputStream(sc.getInputStream());
+                    BufferedInputStream bis = new BufferedInputStream(client.getInputStream());
                     DataInputStream dis = new DataInputStream(bis);
-                    paddle2.setLocation(dis.readInt(), dis.readInt());
-                    
+                    for(int i=0; i<ballNum; i++) {
+                        balls[i].setLocation(dis.readInt(), dis.readInt());
+                    }
+                    paddle1.setLocation(dis.readInt(), dis.readInt());
+                    score.player1 = dis.readInt();
+                    score.player2 = dis.readInt();
+
+                    BufferedOutputStream bos = new BufferedOutputStream(client.getOutputStream());
+                    DataOutputStream dos = new DataOutputStream(bos);
+                    dos.writeInt((int)paddle2.getX());
+                    dos.writeInt((int)paddle2.getY());
+                    bos.flush();
                     boolean stop = checkWinner();
                     repaint();
                     if(stop) gameThread.stop();
@@ -190,7 +159,6 @@ public class GamePanelServer extends JPanel implements Runnable {
                 }
             }
         } catch (IOException ex) {
-            System.out.println("Server da dong");
         }
     }
     public class AL extends KeyAdapter{
@@ -202,6 +170,6 @@ public class GamePanelServer extends JPanel implements Runnable {
             paddle1.keyReleased(e);
             paddle2.keyReleased(e);
         }
-
     }
 }
+

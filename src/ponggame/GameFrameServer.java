@@ -3,10 +3,10 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package Pong3;
+package ponggame;
 
-import static Pong3.GameFrameClient.SCREEN_SIZE;
-import Pong3.GamePanelClient.AL;
+import static ponggame.GameFrameClient.SCREEN_SIZE;
+import ponggame.GamePanelClient.AL;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
