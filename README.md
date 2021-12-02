@@ -12,7 +12,7 @@ Pong game (hay còn gọi là game bóng bàn) là ứng dụng chơi game đư�
 
 - TCP 
 
-### 2.2: Tìm kiếm server sử dụng UDP (broadcast)
+### 2.2: Tìm kiếm server sử dụng broadcast
 
 - UDP
 
