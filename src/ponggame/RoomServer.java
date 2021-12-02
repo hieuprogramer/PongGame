@@ -79,8 +79,6 @@ public class RoomServer extends javax.swing.JFrame {
             public void run() {
                 try {
                     //server
-                    String message = MSG_SERVER_IDENTIFY+"#"+roomName+"#"+playerName;
-                    byte[] response = message.getBytes();
                     
                     buffer = new byte[BUFFER_SIZE];
                     UDPserver = new DatagramSocket(SERVERPORT);
@@ -94,6 +92,8 @@ public class RoomServer extends javax.swing.JFrame {
                             System.out.printf("Request SERVER from IP: %s\n",pkdp.getAddress().getHostAddress());
 
                             // gui thong bao xac nhan day la server
+                            String message = MSG_SERVER_IDENTIFY+"#"+roomName+"#"+playerName;
+                            byte[] response = message.getBytes();
                             DatagramPacket outpkdp = new DatagramPacket(response, response.length,
                                     pkdp.getAddress(), CLIENTPORT);
                             UDPserver.send(outpkdp);

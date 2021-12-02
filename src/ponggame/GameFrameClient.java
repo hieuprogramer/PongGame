@@ -44,7 +44,8 @@ public class GameFrameClient extends JFrame {
         JPanel panel2 = new JPanel();
         JButton suspend = new JButton("Tam dung");
         JButton resume = new JButton("Tiep tuc");
-        suspend.setBounds(0, 0, 80, 80);
+        suspend.setPreferredSize(new Dimension(100, 30));
+        resume.setPreferredSize(new Dimension(100, 30));
         panel2.add(suspend);
         panel2.add(resume);
         this.add(panel2, BorderLayout.SOUTH);
