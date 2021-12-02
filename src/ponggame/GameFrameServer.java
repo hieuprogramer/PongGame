@@ -86,8 +86,8 @@ public class GameFrameServer extends JFrame{
         });
         
     }
-    public static void main(String args[]) throws RemoteException, MalformedURLException {
-        new GameFrameServer(1);
-    }
+//    public static void main(String args[]) throws RemoteException, MalformedURLException {
+//        new GameFrameServer(1);
+//    }
 
 }
